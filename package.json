@@ -43,5 +43,10 @@
 		"onlyBuiltDependencies": [
 			"esbuild"
 		]
+	},
+	"dependencies": {
+		"@types/dagre": "^0.7.53",
+		"@xyflow/svelte": "^1.2.2",
+		"dagre": "^0.8.5"
 	}
 }

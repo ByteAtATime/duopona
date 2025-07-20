@@ -69,7 +69,7 @@
 					<p>{form.error}</p>
 				</div>
 			{:else if fullPhraseNode}
-				<BreakdownTree node={fullPhraseNode} />
+				<BreakdownTree root={fullPhraseNode} />
 			{:else}
 				<div class="text-center text-muted-foreground">
 					<p class="text-lg">Enter a phrase above to begin.</p>
