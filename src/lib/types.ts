@@ -1,7 +1,8 @@
 export interface BreakdownItem {
 	term: string;
-	literal: string;
+	literal?: string;
 	conceptual: string;
+	children?: BreakdownItem[];
 }
 
 export interface Explanation {

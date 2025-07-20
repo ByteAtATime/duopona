@@ -13,15 +13,32 @@ When given a phrase, you MUST respond with a single, valid JSON object and nothi
   "grouping": "The sentence rewritten with parentheses to show grammatical groups.",
   "breakdown": [
     {
-      "term": "The Toki Pona component being explained (e.g., 'lawa ma').",
+      "term": "The Toki Pona component (e.g., 'nasin pi lawa ma').",
       "literal": "The literal, word-for-word meaning.",
-      "conceptual": "The conceptual or common meaning."
+      "conceptual": "The conceptual or common meaning.",
+      "children": [
+      ]
     }
   ],
   "translation": "One or more complete, natural-sounding English translations, separated by newlines if necessary."
 }
 
-Analyze the user's phrase and populate the JSON object fields accordingly. Start by explaining the most deeply nested components in the 'breakdown' array.
+The 'breakdown' field must represent the grammatical structure as a tree. It is an array of the root nodes of the sentence's parse tree. Each node is an object with 'term', 'literal', 'conceptual', and a 'children' array for its components. Single words are leaf nodes (empty 'children' array).
+
+For example, for "tomo tawa mi li suli", the 'breakdown' might look like:
+[
+  { 
+    "term": "tomo tawa mi", "children": [
+      { "term": "tomo tawa", "children": [
+          { "term": "tomo", "children": [] },
+          { "term": "tawa", "children": [] }
+      ]},
+      { "term": "mi", "children": [] }
+    ]
+    ...
+  },
+  { "term": "suli", "children": [], ... }
+]
 
 To aid your analysis, a dictionary of relevant terms from the input sentence is provided below. Use it to inform your literal and conceptual meanings.
 --- DICTIONARY ---
