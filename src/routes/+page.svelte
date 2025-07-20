@@ -12,6 +12,7 @@
 	let isLoading = $state(false);
 
 	let fullPhraseNode: BreakdownItem | null = $derived.by(() => {
+		console.log(form);
 		if (!form?.explanation || !form?.phrase)
 			return dev
 				? {

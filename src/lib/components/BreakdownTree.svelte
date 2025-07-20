@@ -1,81 +1,98 @@
 <script lang="ts">
-	import { SvelteFlow, Background, Controls, MiniMap, type Node, type Edge } from '@xyflow/svelte';
+	import { SvelteFlow, Background, Controls, type Node, type Edge } from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
 	import type { BreakdownItem } from '$lib/types';
 	import CustomNode from './CustomNode.svelte';
 	import dagre from 'dagre';
 
-	let { root }: { root: BreakdownItem } = $props();
+	let { root }: { root: BreakdownItem | null } = $props();
 
 	const nodeTypes = {
 		custom: CustomNode
 	};
 
-	const dagreGraph = new dagre.graphlib.Graph();
-	dagreGraph.setDefaultEdgeLabel(() => ({}));
-	dagreGraph.setGraph({ rankdir: 'TB', nodesep: 0, edgesep: 0, ranksep: 0 });
+	const layouted = $derived.by(() => {
+		if (!root) {
+			return { nodes: [], edges: [] };
+		}
 
-	const initialNodes: Node[] = [];
-	const initialEdges: Edge[] = [];
+		const dagreGraph = new dagre.graphlib.Graph();
+		dagreGraph.setDefaultEdgeLabel(() => ({}));
+		dagreGraph.setGraph({ rankdir: 'TB', nodesep: 25, ranksep: 50 });
 
-	function getDisplayTerm(node: BreakdownItem): string {
-		return node.grouping ?? node.term;
-	}
+		const calculatedNodes: Node[] = [];
+		const calculatedEdges: Edge[] = [];
 
-	function processNode(node: BreakdownItem, parentId?: string) {
-		const id = node.term;
-		initialNodes.push({
-			id,
-			type: 'custom',
-			data: {
-				term: getDisplayTerm(node),
-				literal: node.literal,
-				conceptual: node.conceptual,
-				hasParent: !!parentId,
-				hasChildren: !!node.children?.length
-			},
-			position: { x: 0, y: 0 }
+		function getDisplayTerm(node: BreakdownItem): string {
+			return node.grouping ?? node.term;
+		}
+
+		function processNode(node: BreakdownItem, parentId?: string) {
+			const id = node.term;
+			calculatedNodes.push({
+				id,
+				type: 'custom',
+				data: {
+					term: getDisplayTerm(node),
+					literal: node.literal,
+					conceptual: node.conceptual,
+					hasParent: !!parentId,
+					hasChildren: !!node.children?.length
+				},
+				position: { x: 0, y: 0 }
+			});
+
+			if (parentId) {
+				calculatedEdges.push({
+					id: `${parentId}->${id}`,
+					source: parentId,
+					target: id
+				});
+			}
+
+			if (node.children) {
+				node.children.forEach((child) => processNode(child, id));
+			}
+		}
+
+		processNode(root);
+
+		const nodeWidth = 200;
+		const nodeHeight = 150;
+
+		calculatedNodes.forEach((node) => {
+			dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
 		});
 
-		if (parentId) {
-			initialEdges.push({
-				id: `${parentId}-${id}`,
-				source: parentId,
-				target: id
-			});
-		}
+		calculatedEdges.forEach((edge) => {
+			dagreGraph.setEdge(edge.source, edge.target);
+		});
 
-		if (node.children) {
-			node.children.forEach((child) => processNode(child, id));
-		}
-	}
+		dagre.layout(dagreGraph);
 
-	processNode(root);
-
-	initialNodes.forEach((node) => {
-		dagreGraph.setNode(node.id, { width: 200, height: 150 });
-	});
-
-	initialEdges.forEach((edge) => {
-		dagreGraph.setEdge(edge.source, edge.target);
-	});
-
-	dagre.layout(dagreGraph);
-
-	let nodes = $state.raw(
-		initialNodes.map((node) => {
+		const finalNodes = calculatedNodes.map((node) => {
 			const nodeWithPosition = dagreGraph.node(node.id);
-			node.position = {
-				x: nodeWithPosition.x - nodeWithPosition.width / 2,
-				y: nodeWithPosition.y - nodeWithPosition.height / 2
+			return {
+				...node,
+				position: {
+					x: nodeWithPosition.x - nodeWidth / 2,
+					y: nodeWithPosition.y - nodeHeight / 2
+				}
 			};
-			return node;
-		})
-	);
+		});
 
-	let edges = $state.raw(initialEdges);
+		return { nodes: finalNodes, edges: calculatedEdges };
+	});
 
-	const rootNode = $derived(nodes.find((node) => !node.data.hasParent));
+	let nodes = $state.raw(layouted.nodes);
+	let edges = $state.raw(layouted.edges);
+
+	$effect(() => {
+		nodes = layouted.nodes;
+		edges = layouted.edges;
+	});
+
+	const rootNodeId = $derived(nodes.find((node) => !node.data.hasParent)?.id);
 </script>
 
 <div class="w-full self-stretch">
@@ -84,7 +101,7 @@
 		bind:edges
 		{nodeTypes}
 		fitView
-		fitViewOptions={{ nodes: [{ id: nodes.find((node) => !node.data.hasParent)?.id }] }}
+		fitViewOptions={{ nodes: rootNodeId ? [{ id: rootNodeId }] : undefined }}
 		nodesDraggable={false}
 	>
 		<Background />

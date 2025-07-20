@@ -14,8 +14,7 @@ When given a phrase, you MUST respond with a single, valid JSON object and nothi
   "breakdown": [
     {
       "term": "The Toki Pona component (e.g., 'tomo tawa mi').",
-      "grouping": "The component rewritten with parentheses to show its own internal grammatical groups. If a term has no children, this field should be the same as the 'term' field.",
-      "literal": "The literal, word-for-word meaning.",
+      "literal": "The literal, word-for-word meaning, if different than conceptual.",
       "conceptual": "The conceptual or common meaning.",
       "children": []
     }
@@ -28,22 +27,28 @@ The 'breakdown' field must represent the grammatical structure as a tree.
 CRITICAL RULE: Grammatical particles (li, e, pi, o, la) MUST NOT appear as nodes (i.e., objects) in the 'breakdown' tree. Their grammatical function must be represented by the tree's structure and included in the 'grouping' strings.
 
 For example, for "tomo tawa mi li suli", the top-level 'grouping' would be "((tomo tawa) mi) li (suli)". The 'breakdown' array would contain two items, one for the subject '(tomo tawa) mi' and one for the predicate 'suli'.
-The breakdown for the subject 'tomo tawa mi' would look like this:
+The breakdown for the subject 'tomo tawa mi li suli' would look like this:
 {
-  "term": "tomo tawa mi",
-  "grouping": "(tomo tawa) mi",
-  "conceptual": "my vehicle",
+  "term": "tomo tawa mi li suli",
+  "grouping": "((tomo tawa) mi) li (suli)",
+  "conceptual": "my car is big",
   "children": [
     {
-      "term": "tomo tawa",
-      "grouping": "tomo tawa",
-      "conceptual": "vehicle",
+      "term": "tomo tawa mi",
+      "conceptual": "my car",
+	  "grouping": "(tomo tawa) mi",
       "children": [
-        { "term": "tomo", "grouping": "tomo", "children": [] ... },
-        { "term": "tawa", "grouping": "tawa", "children": [] ... }
+        {
+	  		"term": "tomo tawa",
+			"grouping": "tomo tawa",
+			"conceptual": "car",
+			"literal": "moving structure",
+			"children": [ ... ]
+		},
+        ...
       ]
     },
-    { "term": "mi", "grouping": "mi", "children": [] ... }
+    ...
   ]
 }
 
@@ -63,7 +68,6 @@ export const actions = {
 		}
 
 		const dictionaryForPhrase = generateDictionaryForPhrase(phrase, dictionaryContent);
-		console.log(dictionaryForPhrase);
 
 		const finalSystemPrompt = SYSTEM_PROMPT.replace('{dictionary}', dictionaryForPhrase);
 
