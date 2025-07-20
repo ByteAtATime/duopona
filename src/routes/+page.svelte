@@ -5,15 +5,73 @@
 	import { enhance } from '$app/forms';
 	import BreakdownTree from '$lib/components/BreakdownTree.svelte';
 	import type { BreakdownItem } from '$lib/types';
+	import { dev } from '$app/environment';
 
 	const { form } = $props();
 
 	let isLoading = $state(false);
 
 	let fullPhraseNode: BreakdownItem | null = $derived.by(() => {
-		if (!form?.explanation || !form?.phrase) return null;
+		if (!form?.explanation || !form?.phrase)
+			return dev
+				? {
+						term: 'nasin pi lawa ma li ken ike',
+						grouping: '(nasin pi (lawa ma)) li (ken ike)',
+						conceptual: 'Government systems can be problematic.',
+						children: [
+							{
+								term: 'nasin pi lawa ma',
+								grouping: 'nasin pi (lawa ma)',
+								literal: 'way of govern land',
+								conceptual: 'political system',
+								children: [
+									{
+										term: 'nasin',
+										grouping: 'nasin',
+										literal: 'way',
+										conceptual: 'way',
+										children: []
+									},
+									{
+										term: 'lawa ma',
+										grouping: 'lawa ma',
+										literal: 'govern land',
+										conceptual: 'government',
+										children: [
+											{
+												term: 'lawa',
+												grouping: 'lawa',
+												literal: 'govern',
+												conceptual: 'govern',
+												children: []
+											},
+											{
+												term: 'ma',
+												grouping: 'ma',
+												literal: 'land',
+												conceptual: 'land',
+												children: []
+											}
+										]
+									}
+								]
+							},
+							{
+								term: 'ken ike',
+								grouping: 'ken ike',
+								literal: 'can be bad',
+								conceptual: 'is able to be bad',
+								children: [
+									{ term: 'ken', grouping: 'ken', literal: 'can', conceptual: 'can', children: [] },
+									{ term: 'ike', grouping: 'ike', literal: 'bad', conceptual: 'bad', children: [] }
+								]
+							}
+						]
+					}
+				: null;
 		return {
 			term: form.phrase,
+			grouping: form.explanation.grouping,
 			conceptual: form.explanation.translation.split('\n')[0],
 			children: form.explanation.breakdown
 		};
@@ -54,7 +112,7 @@
 		</div>
 	</header>
 
-	<main class="flex-grow overflow-auto p-8">
+	<main class="flex-grow overflow-auto">
 		<div class="flex min-h-full min-w-max items-center justify-center">
 			{#if isLoading}
 				<div class="flex items-center text-muted-foreground">

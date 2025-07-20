@@ -13,24 +13,28 @@
 
 	const dagreGraph = new dagre.graphlib.Graph();
 	dagreGraph.setDefaultEdgeLabel(() => ({}));
-	dagreGraph.setGraph({ rankdir: 'TB' });
+	dagreGraph.setGraph({ rankdir: 'TB', nodesep: 0, edgesep: 0, ranksep: 0 });
 
 	const initialNodes: Node[] = [];
 	const initialEdges: Edge[] = [];
 
+	function getDisplayTerm(node: BreakdownItem): string {
+		return node.grouping ?? node.term;
+	}
+
 	function processNode(node: BreakdownItem, parentId?: string) {
-		const id = node.term; // Assuming term is unique
+		const id = node.term;
 		initialNodes.push({
 			id,
 			type: 'custom',
 			data: {
-				term: node.term,
+				term: getDisplayTerm(node),
 				literal: node.literal,
 				conceptual: node.conceptual,
 				hasParent: !!parentId,
 				hasChildren: !!node.children?.length
 			},
-			position: { x: 0, y: 0 } // Dagre will set the position
+			position: { x: 0, y: 0 }
 		});
 
 		if (parentId) {
@@ -49,7 +53,7 @@
 	processNode(root);
 
 	initialNodes.forEach((node) => {
-		dagreGraph.setNode(node.id, { width: 320, height: 150 }); // Approximate dimensions for layout
+		dagreGraph.setNode(node.id, { width: 200, height: 150 });
 	});
 
 	initialEdges.forEach((edge) => {
@@ -70,6 +74,8 @@
 	);
 
 	let edges = $state.raw(initialEdges);
+
+	const rootNode = $derived(nodes.find((node) => !node.data.hasParent));
 </script>
 
 <div class="w-full self-stretch">
@@ -79,6 +85,7 @@
 		{nodeTypes}
 		fitView
 		fitViewOptions={{ nodes: [{ id: nodes.find((node) => !node.data.hasParent)?.id }] }}
+		nodesDraggable={false}
 	>
 		<Background />
 		<Controls />
