@@ -4,10 +4,46 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Loader2 } from '@lucide/svelte';
 	import { enhance } from '$app/forms';
+	import Grouping from '$lib/components/Grouping.svelte';
+
+	type GroupingNode = string | GroupingNode[];
 
 	const { form } = $props();
 
 	let isLoading = $state(false);
+
+	function parseGroupingString(str: string): GroupingNode[] {
+		const result: GroupingNode[] = [];
+		let buffer = '';
+		let i = 0;
+		while (i < str.length) {
+			if (str[i] === '(') {
+				if (buffer) {
+					result.push(buffer);
+					buffer = '';
+				}
+				let balance = 1;
+				let j = i + 1;
+				while (j < str.length) {
+					if (str[j] === '(') balance++;
+					else if (str[j] === ')') balance--;
+					if (balance === 0) break;
+					j++;
+				}
+
+				const inner = str.substring(i + 1, j);
+				result.push(parseGroupingString(inner));
+				i = j + 1;
+			} else {
+				buffer += str[i];
+				i++;
+			}
+		}
+		if (buffer) {
+			result.push(buffer);
+		}
+		return result;
+	}
 </script>
 
 <main class="container mx-auto max-w-2xl space-y-8 p-4 sm:p-8">
@@ -72,7 +108,13 @@
 					<Card.Description>How the phrase is structured with particles.</Card.Description>
 				</Card.Header>
 				<Card.Content>
-					<p class="rounded-md bg-muted p-4 font-mono text-lg">{form.explanation.grouping}</p>
+					<p class="rounded-md bg-muted p-4 font-mono text-lg">
+						{#if form.explanation.grouping}
+							{#each parseGroupingString(form.explanation.grouping) as node}
+								<Grouping {node} depth={0} />
+							{/each}
+						{/if}
+					</p>
 				</Card.Content>
 			</Card.Root>
 
@@ -108,9 +150,7 @@
 					<Card.Description>A natural English translation combining all concepts.</Card.Description>
 				</Card.Header>
 				<Card.Content>
-					<div class="text-base whitespace-pre-wrap">
-						{form.explanation.translation}
-					</div>
+					<div class="text-base whitespace-pre-wrap">{form.explanation.translation}</div>
 				</Card.Content>
 			</Card.Root>
 		</div>
