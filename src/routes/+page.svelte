@@ -12,7 +12,6 @@
 	let isLoading = $state(false);
 
 	let fullPhraseNode: BreakdownItem | null = $derived.by(() => {
-		console.log(form);
 		if (!form?.explanation || !form?.phrase)
 			return dev
 				? {
@@ -22,35 +21,32 @@
 						children: [
 							{
 								term: 'nasin pi lawa ma',
-								grouping: 'nasin pi (lawa ma)',
+								grouping: '(nasin pi (lawa ma))',
 								literal: 'way of govern land',
 								conceptual: 'political system',
 								children: [
 									{
 										term: 'nasin',
 										grouping: 'nasin',
-										literal: 'way',
-										conceptual: 'way',
+										conceptual: 'way, method, doctrine',
 										children: []
 									},
 									{
 										term: 'lawa ma',
-										grouping: 'lawa ma',
+										grouping: '(lawa ma)',
 										literal: 'govern land',
 										conceptual: 'government',
 										children: [
 											{
 												term: 'lawa',
 												grouping: 'lawa',
-												literal: 'govern',
-												conceptual: 'govern',
+												conceptual: 'to lead, to govern; head',
 												children: []
 											},
 											{
 												term: 'ma',
 												grouping: 'ma',
-												literal: 'land',
-												conceptual: 'land',
+												conceptual: 'land, country, region',
 												children: []
 											}
 										]
@@ -59,12 +55,17 @@
 							},
 							{
 								term: 'ken ike',
-								grouping: 'ken ike',
+								grouping: '(ken ike)',
 								literal: 'can be bad',
-								conceptual: 'is able to be bad',
+								conceptual: 'is able to be bad/problematic',
 								children: [
-									{ term: 'ken', grouping: 'ken', literal: 'can', conceptual: 'can', children: [] },
-									{ term: 'ike', grouping: 'ike', literal: 'bad', conceptual: 'bad', children: [] }
+									{
+										term: 'ken',
+										grouping: 'ken',
+										conceptual: 'can, to be able to',
+										children: []
+									},
+									{ term: 'ike', grouping: 'ike', conceptual: 'bad, negative', children: [] }
 								]
 							}
 						]
@@ -77,6 +78,8 @@
 			children: form.explanation.breakdown
 		};
 	});
+
+	console.log(fullPhraseNode);
 </script>
 
 <div class="flex h-screen flex-col bg-background text-foreground">

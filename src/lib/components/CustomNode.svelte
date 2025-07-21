@@ -3,6 +3,11 @@
 	import Grouping from './Grouping.svelte';
 
 	let { data }: NodeProps = $props();
+
+	const grouping =
+		data.term && data.term.startsWith('(') && data.term.endsWith(')')
+			? data.term.substring(1, data.term.length - 1)
+			: data.term;
 </script>
 
 {#if data.hasParent}
@@ -10,7 +15,7 @@
 {/if}
 <div class="w-full max-w-xs rounded-md border bg-card p-3 text-card-foreground shadow-sm">
 	<h4 class="font-bold">
-		<Grouping text={data.term as string} />
+		<Grouping text={grouping as string} />
 	</h4>
 	<dl class="mt-1 space-y-0.5 text-xs">
 		{#if data.literal}
