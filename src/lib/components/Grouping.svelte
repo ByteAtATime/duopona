@@ -12,11 +12,33 @@
 	type Part = { text: string; depth: number };
 
 	function createParts(inputText: string): Part[] {
+		let processedText = inputText.trim();
+
+		if (processedText.startsWith('(') && processedText.endsWith(')')) {
+			let balance = 0;
+			let whollyEnclosed = true;
+			for (let i = 1; i < processedText.length - 1; i++) {
+				if (processedText[i] === '(') {
+					balance++;
+				} else if (processedText[i] === ')') {
+					balance--;
+				}
+				if (balance < 0) {
+					whollyEnclosed = false;
+					break;
+				}
+			}
+
+			if (whollyEnclosed && balance === 0) {
+				processedText = processedText.slice(1, -1);
+			}
+		}
+
 		const parts: Part[] = [];
 		let currentDepth = -1;
 		let buffer = '';
 
-		for (const char of inputText) {
+		for (const char of processedText) {
 			if (char === '(') {
 				if (buffer) parts.push({ text: buffer, depth: currentDepth });
 				buffer = '';
