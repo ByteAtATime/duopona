@@ -12,9 +12,37 @@
 	const lines = matchLines(story);
 </script>
 
-{#each lines as line}
-	<Markdown md={line.toki} {plugins} />
-	<Markdown md={line.original} {plugins} />
-	<Markdown md={line.literal} {plugins} />
-	<hr />
-{/each}
+{#snippet renderLine(text: string)}
+	{#if text.trim()}
+		<div class="prose">
+			<Markdown md={text} {plugins} />
+		</div>
+	{:else}
+		<div class="h-8"></div>
+	{/if}
+{/snippet}
+
+<table class="mx-auto">
+	<thead>
+		<tr>
+			<th class="px-6 py-1">Toki Pona</th>
+			<th class="px-6 py-1">Literal Translation</th>
+			<th class="px-6 py-1">Original</th>
+		</tr>
+	</thead>
+	<tbody>
+		{#each lines as line}
+			<tr class="hover:bg-muted">
+				<td class="px-6 py-1">
+					{@render renderLine(line.toki)}
+				</td>
+				<td class="px-6 py-1">
+					{@render renderLine(line.literal)}
+				</td>
+				<td class="px-6 py-1">
+					{@render renderLine(line.original)}
+				</td>
+			</tr>
+		{/each}
+	</tbody>
+</table>
