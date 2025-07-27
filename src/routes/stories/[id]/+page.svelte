@@ -18,28 +18,28 @@
 			<Markdown md={text} {plugins} />
 		</div>
 	{:else}
-		<div class="h-8"></div>
+		<div class="h-2 md:h-8"></div>
 	{/if}
 {/snippet}
 
-<table class="mx-auto">
-	<thead>
+<table class="mx-auto my-12 w-full md:table md:w-auto">
+	<thead class="hidden md:table-header-group">
 		<tr>
 			<th class="px-6 py-1">Toki Pona</th>
 			<th class="px-6 py-1">Literal Translation</th>
 			<th class="px-6 py-1">Original</th>
 		</tr>
 	</thead>
-	<tbody>
+	<tbody class="block md:table-row-group">
 		{#each lines as line}
-			<tr class="hover:bg-muted">
-				<td class="px-6 py-1">
+			<tr class="mt-2 block hover:bg-muted md:table-row">
+				<td class="block px-6 md:table-cell md:py-1">
 					{@render renderLine(line.toki)}
 				</td>
-				<td class="px-6 py-1">
+				<td class="block pr-6 pl-12 md:table-cell md:py-1 md:pl-6">
 					{@render renderLine(line.literal)}
 				</td>
-				<td class="px-6 py-1">
+				<td class="block pr-6 pl-12 md:table-cell md:py-1 md:pl-6">
 					{@render renderLine(line.original)}
 				</td>
 			</tr>
