@@ -46,7 +46,7 @@ export const tokenizeTokiPona = (sentence: string): Token[] => {
 		.join('')
 		.trim();
 
-	const words = cleanedString.split(' ');
+	const words = cleanedString.split(' ').filter((w) => w.length > 0);
 
 	const definitions = getDictionaryDefinitions(dictionary);
 	const maxSubsetLength = Math.max(...definitions.keys().map((key) => key.split(' ').length));
@@ -54,6 +54,7 @@ export const tokenizeTokiPona = (sentence: string): Token[] => {
 	const tokens: Token[] = [];
 
 	for (let i = 0; i < words.length; ) {
+		let found = false;
 		for (
 			let wordsToConsume = Math.min(maxSubsetLength, words.length - i);
 			wordsToConsume >= 1;
@@ -63,11 +64,15 @@ export const tokenizeTokiPona = (sentence: string): Token[] => {
 			if (definitions.has(phrase)) {
 				tokens.push({ phrase, definition: definitions.get(phrase) });
 				i += wordsToConsume;
+				found = true;
 				break;
 			}
 		}
+		if (!found) {
+			tokens.push({ phrase: words[i], definition: undefined });
+			i++;
+		}
 	}
 
-	console.log(tokens);
 	return tokens;
 };
